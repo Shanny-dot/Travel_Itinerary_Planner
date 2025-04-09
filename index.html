@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Buddy Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(to bottom right, #e6f0fa, #b3d9ff);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #1e90ff;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus {
+            border-color: #1e90ff;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1e90ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1873cc;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            display: none;
+        }
+        #result.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Travel Buddy Planner</h1>
+        <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" placeholder="e.g., Paris" required>
+        </div>
+        <div class="form-group">
+            <label for="budget">Budget (₹)</label>
+            <input type="number" id="budget" placeholder="e.g., 500" min="1" required>
+        </div>
+        <div class="form-group">
+            <label for="days">Days</label>
+            <input type="number" id="days" placeholder="e.g., 3" min="1" required>
+        </div>
+        <div class="form-group">
+            <label for="interests">Interests</label>
+            <textarea id="interests" placeholder="e.g., art and food" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="cuisine">Favorite Cuisine</label>
+            <input type="text" id="cuisine" placeholder="e.g., French" required>
+        </div>
+        <button onclick="getPlan()">Plan My Trip!</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function getPlan() {
+            const city = document.getElementById('city').value;
+            const budget = document.getElementById('budget').value;
+            const days = document.getElementById('days').value;
+            const interests = document.getElementById('interests').value;
+            const cuisine = document.getElementById('cuisine').value;
+
+            if (!city || !budget || !days || !interests || !cuisine) {
+                alert('Please fill in all fields!');
+                return;
+            }
+
+            const data = { 
+                city, 
+                budget: parseInt(budget), 
+                days: parseInt(days), 
+                interests, 
+                cuisine 
+            };
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/plan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('Backend error: ' + response.status);
+                const result = await response.json();
+                console.log('Response:', result);  // Debug
+                resultDiv.textContent = result.itinerary;  // Display itinerary
+                resultDiv.classList.add('show');
+            } catch (error) {
+                console.error('Fetch error:', error);
+                resultDiv.textContent = 'Oops! Something went wrong: ' + error.message;
+                resultDiv.classList.add('show');
+            }
+        }
+    </script>
+</body>
+</html>
